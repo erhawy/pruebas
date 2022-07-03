@@ -1,11 +1,11 @@
-package com.travelgatex.demo.api.data;
+package com.travelgatex.demo.service.data;
 
 import lombok.Data;
 
 @Data
-public class HotelResponse {
+public class HotelesAtalaya {
     private String code;
     private String name;
     private String city;
-    private RoomsResponse rooms;
+
 }
