@@ -12,8 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ClientResortService {
 
-    private final String URLHOTELS =  "http://www.mocky.io/v2/5e4e43272f00006c0016a52b";
-    private final String URLMEAL = "http://www.mocky.io/v2/5e4a7dd02f0000290097d24b";
+    private static final String URLHOTELS =  "http://www.mocky.io/v2/5e4e43272f00006c0016a52b";
+    private static final String URLMEAL = "http://www.mocky.io/v2/5e4a7dd02f0000290097d24b";
 
     public ResortsHotels obtenerHoteles(){
         WebClient client = WebClient.create(URLHOTELS);

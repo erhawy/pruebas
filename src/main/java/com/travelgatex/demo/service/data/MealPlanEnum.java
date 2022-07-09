@@ -1,6 +1,5 @@
 package com.travelgatex.demo.service.data;
 
-import lombok.Data;
 
 public enum MealPlanEnum {
     PC("Pension Completa", "pc"),

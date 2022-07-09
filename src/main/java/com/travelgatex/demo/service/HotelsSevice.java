@@ -1,7 +1,6 @@
 package com.travelgatex.demo.service;
 
 import com.travelgatex.demo.api.data.*;
-import com.travelgatex.demo.mapper.AtalayaMapper;
 import com.travelgatex.demo.service.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -107,7 +106,7 @@ public class HotelsSevice {
                     return lista;
                 }
 
-        ).flatMap(Collection::stream).collect(Collectors.toList());
+        ).flatMap(Collection::stream).toList();
     }
 
     public ItineraryResponse obtenerItinerario() {
