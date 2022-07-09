@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class HotelsSevice {
 
     private final ClientAtalayaService clientAtalayaService;
+    private final ClientResortService clientResortService;
 
     public List<HotelResponse> obtenerInfoHoteles() {
         AtalayaMealsResponse atalayaMealsResponse = clientAtalayaService.obtenerRegimenes();
@@ -27,12 +28,42 @@ public class HotelsSevice {
         hoteles.addAll(atalayaMealsResponse.getMeal_plans()
                 .stream()
                 .map(meal -> {return generarHotelResponse(meal);})
-                .flatMap(Collection::stream).collect(Collectors.toList()));
+                .flatMap(Collection::stream).toList());
+
+        RegimenesResort regimenesResort = clientResortService.obtenerRegimenes();
+        ResortsHotels hotels = clientResortService.obtenerHoteles();
+        hoteles.addAll(generarHotelResortResponse(regimenesResort, hotels));
 
 
         return hoteles;
 
     }
+
+    private List<HotelResponse> generarHotelResortResponse(RegimenesResort meals, ResortsHotels hotels) {
+        return meals.getRegimenes()
+                .stream()
+                .map(meal -> {
+                    HotelResponse hotelResponse = new HotelResponse();
+                    HotelesResort ht = hotels.getHotels()
+                            .stream()
+                            .filter(hotel -> hotel.getCode().equals(meal.getHotel()))
+                            .findFirst().get();
+                    hotelResponse.setCity(ht.getLocation());
+                    hotelResponse.setName(ht.getName());
+                    hotelResponse.setCode(ht.getCode());
+                    RoomsResponse rooms = new RoomsResponse();
+                    HabitacionesResort hb = ht.getRooms().stream().filter(rm -> rm.getCode().equals(meal.getRoom_type())).findFirst().get();
+                    rooms.setName(hb.getName());
+                    rooms.setRoom_type(meal.getRoom_type());
+                    rooms.setMeal_plan(meal.getName());
+                    rooms.setPrice(meal.getPrice());
+                    hotelResponse.setRooms(rooms);
+                    return hotelResponse;
+                }).toList();
+
+
+    }
+
     private List<HotelResponse> generarHotelResponse(MealPlans mealPlans){
         AtalayaResponse atalayaResponse = clientAtalayaService.obtenerHoteles();
         AtalayaRoomsResponse atalayaRoomsResponse = clientAtalayaService.obtenerHabitaciones();
