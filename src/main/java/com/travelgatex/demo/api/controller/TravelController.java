@@ -1,6 +1,8 @@
 package com.travelgatex.demo.api.controller;
 
 import com.travelgatex.demo.api.data.HotelResponse;
+import com.travelgatex.demo.api.data.HotelsResponse;
+import com.travelgatex.demo.api.data.ItineraryResponse;
 import com.travelgatex.demo.service.HotelsSevice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,14 +26,16 @@ public class TravelController {
     private final HotelsSevice hotelsSevice;
 
     @GetMapping(value = "/hotelList")
-    public ResponseEntity<List<HotelResponse>> listar() {
-        List<HotelResponse> hotelResponses = hotelsSevice.obtenerInfoHoteles();
-        return new ResponseEntity<>(hotelResponses, HttpStatus.OK);
+    public ResponseEntity<HotelsResponse> listar() {
+        HotelsResponse response = new HotelsResponse();
+        response.setHotels(hotelsSevice.obtenerInfoHoteles());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(value = "/itineraryCancun")
-    public ResponseEntity<List<HotelResponse>> itinerario() {
-        List<HotelResponse> hotelResponse = new ArrayList<>();
-        return new ResponseEntity<>(hotelResponse, HttpStatus.OK);
+    public ResponseEntity<ItineraryResponse> itinerario() {
+
+        ItineraryResponse response = hotelsSevice.obtenerItinerario();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

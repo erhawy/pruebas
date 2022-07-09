@@ -1,7 +1,6 @@
 package com.travelgatex.demo.service;
 
-import com.travelgatex.demo.api.data.HotelResponse;
-import com.travelgatex.demo.api.data.RoomsResponse;
+import com.travelgatex.demo.api.data.*;
 import com.travelgatex.demo.mapper.AtalayaMapper;
 import com.travelgatex.demo.service.data.*;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +8,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,15 @@ import java.util.stream.Collectors;
 @Log4j2
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HotelsSevice {
+
+    //constantes para itinerario
+    private static final String CANCUN = "Cancun";
+    private static final String MALAGA = "Malaga";
+    private static final BigDecimal TOTAL = new BigDecimal(700);
+    private static final Integer NMAL = 3;
+    private static final Integer NCAN = 5;
+    private static final Integer PERSONAS = 2;
+
 
     private final ClientAtalayaService clientAtalayaService;
     private final ClientResortService clientResortService;
@@ -87,9 +97,9 @@ public class HotelsSevice {
                                 .stream()
                                 .filter(room -> room.getCode().equals(value.getRoom())).findFirst().get();
                         RoomsResponse roomsResponse = new RoomsResponse();
-                        roomsResponse.setName(habitacion.getName());
-                        roomsResponse.setRoom_type(mealPlans.getName());
-                        roomsResponse.setMeal_plan(mealPlans.getCode());
+                        roomsResponse.setName(habitacion.getCode());
+                        roomsResponse.setRoom_type(habitacion.getName());
+                        roomsResponse.setMeal_plan(mealPlans.getName());
                         roomsResponse.setPrice(value.getPrice());
                         response.setRooms(roomsResponse);
                         lista.add(response);
@@ -98,5 +108,58 @@ public class HotelsSevice {
                 }
 
         ).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    public ItineraryResponse obtenerItinerario() {
+        ItineraryResponse response = new ItineraryResponse();
+        List<HotelResponse> listaHoteles = obtenerInfoHoteles();
+        //Obtenemos el menos precio de un hotel con alojamiento y desayuno en cancun
+        HotelsItinerary hotelCancun = listaHoteles
+                .stream()
+                .filter(ht -> ht.getCity().equals(CANCUN) && ht.getRooms().getMeal_plan().equals(MealPlanEnum.AD.getDescripcion()))
+                .map( ht -> {
+                    HotelsItinerary hotelsItinerary = new HotelsItinerary();
+                    hotelsItinerary.setCity(ht.getCity());
+                    hotelsItinerary.setCode(ht.getCode());
+                    hotelsItinerary.setName(ht.getName());
+                    RoomItineary roomItineary = new RoomItineary();
+                    roomItineary.setRoom_type(ht.getRooms().getName());
+                    roomItineary.setMeal_plan(ht.getRooms().getMeal_plan());
+                    roomItineary.setName(ht.getRooms().getName());
+                    roomItineary.setNights(NCAN);
+                    roomItineary.setPrice(ht.getRooms().getPrice().multiply(new BigDecimal(PERSONAS).multiply(new BigDecimal(NCAN))));
+                    hotelsItinerary.setRoom(roomItineary);
+                    return hotelsItinerary;
+                }).min(Comparator.comparing(htI -> htI.getRoom().getPrice())).get();
+
+        //Obtenemos los de malaga
+        List<HotelsItinerary> listaMalaga = listaHoteles
+                .stream()
+                .filter(ht -> ht.getCity().equals(MALAGA) && ht.getRooms().getMeal_plan().equals(MealPlanEnum.PC.getDescripcion()))
+                .map( ht -> {
+                    HotelsItinerary hotelsItinerary = new HotelsItinerary();
+                    hotelsItinerary.setCity(ht.getCity());
+                    hotelsItinerary.setCode(ht.getCode());
+                    hotelsItinerary.setName(ht.getName());
+                    RoomItineary roomItineary = new RoomItineary();
+                    roomItineary.setRoom_type(ht.getRooms().getRoom_type());
+                    roomItineary.setMeal_plan(ht.getRooms().getMeal_plan());
+                    roomItineary.setName(ht.getRooms().getName());
+                    roomItineary.setNights(NMAL);
+                    roomItineary.setPrice(ht.getRooms().getPrice().multiply(new BigDecimal(PERSONAS).multiply(new BigDecimal(NMAL))));
+                    hotelsItinerary.setRoom(roomItineary);
+                    return hotelsItinerary;
+                }).sorted((p1, p2) -> p2.getRoom().getPrice().compareTo(p1.getRoom().getPrice())).toList();
+        List<HotelsItinerary> itinerario = new ArrayList<>();
+        itinerario.add(hotelCancun);
+        for(HotelsItinerary hotel : listaMalaga){
+            if(hotel.getRoom().getPrice().add(hotelCancun.getRoom().getPrice()).compareTo(TOTAL) < 0) {
+                itinerario.add(hotel);
+                break;
+            }
+        }
+        response.setHotels(itinerario);
+        return response;
+
     }
 }
