@@ -15,9 +15,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ClientAtalayaService {
 
-    private final String URLHOTELS =  "http://www.mocky.io/v2/5e4a7e4f2f00005d0097d253";
-    private final String URLROOMS = "https://run.mocky.io/v3/132af02e-8beb-438f-ac6e-a9902bc67036";
-    private final String URLMEAL = "http://www.mocky.io/v2/5e4a7e282f0000490097d252";
+    private static final String URLHOTELS =  "http://www.mocky.io/v2/5e4a7e4f2f00005d0097d253";
+    private static final String URLROOMS = "https://run.mocky.io/v3/132af02e-8beb-438f-ac6e-a9902bc67036";
+    private static final String URLMEAL = "http://www.mocky.io/v2/5e4a7e282f0000490097d252";
 
     public AtalayaResponse obtenerHoteles(){
         WebClient client = WebClient.create(URLHOTELS);
